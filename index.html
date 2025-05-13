@@ -28,7 +28,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      width: 260px;
+      width: 234px;
       background: white;
       padding: 20px;
       border-radius: 12px;
@@ -104,7 +104,7 @@
     </div>
   </div>
 
-  <canvas id="previewCanvas" width="600" height="748"></canvas>
+  <canvas id="previewCanvas" width="550" height="686"></canvas>
   <button id="downloadBtn">下載 PNG</button>
 
   <script>
@@ -139,10 +139,10 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
 
-      const boxX = 74;
-      const boxY = 186;
-      const boxW = 169;
-      const boxH = 169;
+      const boxX = 68;
+      const boxY = 171;
+      const boxW = 155;
+      const boxH = 155;
 
       ctx.font = `${fontSize}px sans-serif`;
       ctx.textAlign = textAlign;
