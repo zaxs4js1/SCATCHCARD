@@ -4,10 +4,83 @@
   <meta charset="UTF-8">
   <title>刮刮樂內容編輯器</title>
   <style>
-    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 20px; }
-    #previewCanvas { border: 1px solid #ccc; margin-top: 20px; }
-    .controls { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; width: 300px; }
-    label { font-weight: bold; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    #previewCanvas {
+      border: 6px solid #e3e3e3;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+    .controls {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 260px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    label {
+      font-weight: bold;
+      color: #444;
+    }
+    textarea {
+      width: 100%;
+      height: 180px;
+      resize: none;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    .align-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+    }
+    .align-buttons button {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #f0f0f0;
+      cursor: pointer;
+    }
+    .align-buttons button.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    #downloadBtn {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+    }
+    #downloadBtn:hover {
+      background-color: #218838;
+    }
   </style>
 </head>
 <body>
@@ -15,7 +88,7 @@
 
   <div class="controls">
     <label>刮刮樂文字：</label>
-    <textarea id="scratchText" rows="3">恭喜中獎！🎉</textarea>
+    <textarea id="scratchText">恭喜中獎！🎉</textarea>
 
     <label>文字大小（px）：<span id="fontSizeVal">32</span></label>
     <input type="range" id="fontSize" min="10" max="80" value="32">
@@ -24,14 +97,14 @@
     <input type="range" id="lineHeight" min="1" max="2" step="0.1" value="1.2">
 
     <label>文字對齊：</label>
-    <select id="textAlign">
-      <option value="left">靠左</option>
-      <option value="center" selected>置中</option>
-      <option value="right">靠右</option>
-    </select>
+    <div class="align-buttons">
+      <button data-align="left">靠左</button>
+      <button data-align="center" class="active">置中</button>
+      <button data-align="right">靠右</button>
+    </div>
   </div>
 
-  <canvas id="previewCanvas" width="512" height="768"></canvas>
+  <canvas id="previewCanvas"></canvas>
   <button id="downloadBtn">下載 PNG</button>
 
   <script>
@@ -42,7 +115,9 @@
     const lineHeightInput = document.getElementById('lineHeight');
     const fontSizeVal = document.getElementById('fontSizeVal');
     const lineHeightVal = document.getElementById('lineHeightVal');
-    const textAlignSelect = document.getElementById('textAlign');
+    const alignButtons = document.querySelectorAll('.align-buttons button');
+
+    let textAlign = 'center';
 
     const bgImage = new Image();
     bgImage.src = 'Snipaste_2025-05-14_00-49-47.png';
@@ -50,6 +125,8 @@
 
     bgImage.onload = () => {
       bgLoaded = true;
+      canvas.width = bgImage.width;
+      canvas.height = bgImage.height;
       drawText();
     };
 
@@ -59,11 +136,10 @@
       const text = textarea.value;
       const fontSize = parseInt(fontSizeInput.value);
       const lineHeight = parseFloat(lineHeightInput.value);
-      const align = textAlignSelect.value;
       const lines = text.split('\n');
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(bgImage, 0, 0);
 
       const boxX = 120;
       const boxY = 300;
@@ -71,15 +147,15 @@
       const boxH = 272;
 
       ctx.font = `${fontSize}px sans-serif`;
-      ctx.textAlign = align;
+      ctx.textAlign = textAlign;
       ctx.fillStyle = '#000';
 
       const totalHeight = fontSize * lineHeight * lines.length;
       let y = boxY + (boxH - totalHeight) / 2 + fontSize;
 
       let x;
-      if (align === 'left') x = boxX;
-      else if (align === 'right') x = boxX + boxW;
+      if (textAlign === 'left') x = boxX;
+      else if (textAlign === 'right') x = boxX + boxW;
       else x = boxX + boxW / 2;
 
       lines.forEach(line => {
@@ -97,7 +173,14 @@
       lineHeightVal.textContent = lineHeightInput.value;
       drawText();
     });
-    textAlignSelect.addEventListener('change', drawText);
+    alignButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        alignButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        textAlign = btn.dataset.align;
+        drawText();
+      });
+    });
 
     document.getElementById('downloadBtn').addEventListener('click', () => {
       const link = document.createElement('a');
