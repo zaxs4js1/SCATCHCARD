@@ -104,7 +104,7 @@
     </div>
   </div>
 
-  <canvas id="previewCanvas"></canvas>
+  <canvas id="previewCanvas" width="600" height="748"></canvas>
   <button id="downloadBtn">下載 PNG</button>
 
   <script>
@@ -125,8 +125,6 @@
 
     bgImage.onload = () => {
       bgLoaded = true;
-      canvas.width = bgImage.width;
-      canvas.height = bgImage.height;
       drawText();
     };
 
@@ -139,12 +137,12 @@
       const lines = text.split('\n');
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(bgImage, 0, 0);
+      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
 
-      const boxX = 120;
-      const boxY = 300;
-      const boxW = 272;
-      const boxH = 272;
+      const boxX = 74;
+      const boxY = 186;
+      const boxW = 169;
+      const boxH = 169;
 
       ctx.font = `${fontSize}px sans-serif`;
       ctx.textAlign = textAlign;
