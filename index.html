@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>刮刮樂內容編輯器</title>
+  <style>
+    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 20px; }
+    #previewCanvas { border: 1px solid #ccc; margin-top: 20px; }
+    .controls { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; width: 300px; }
+    label { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>刮刮樂內容編輯器</h2>
+
+  <div class="controls">
+    <label>刮刮樂文字：</label>
+    <textarea id="scratchText" rows="3">恭喜中獎！🎉</textarea>
+
+    <label>文字大小（px）：<span id="fontSizeVal">32</span></label>
+    <input type="range" id="fontSize" min="10" max="80" value="32">
+
+    <label>行距（em）：<span id="lineHeightVal">1.2</span></label>
+    <input type="range" id="lineHeight" min="1" max="2" step="0.1" value="1.2">
+
+    <label>文字對齊：</label>
+    <select id="textAlign">
+      <option value="left">靠左</option>
+      <option value="center" selected>置中</option>
+      <option value="right">靠右</option>
+    </select>
+  </div>
+
+  <canvas id="previewCanvas" width="512" height="768"></canvas>
+  <button id="downloadBtn">下載 PNG</button>
+
+  <script>
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const textarea = document.getElementById('scratchText');
+    const fontSizeInput = document.getElementById('fontSize');
+    const lineHeightInput = document.getElementById('lineHeight');
+    const fontSizeVal = document.getElementById('fontSizeVal');
+    const lineHeightVal = document.getElementById('lineHeightVal');
+    const textAlignSelect = document.getElementById('textAlign');
+
+    const bgImage = new Image();
+    bgImage.src = 'Snipaste_2025-05-14_00-49-47.png';
+    let bgLoaded = false;
+
+    bgImage.onload = () => {
+      bgLoaded = true;
+      drawText();
+    };
+
+    function drawText() {
+      if (!bgLoaded) return;
+
+      const text = textarea.value;
+      const fontSize = parseInt(fontSizeInput.value);
+      const lineHeight = parseFloat(lineHeightInput.value);
+      const align = textAlignSelect.value;
+      const lines = text.split('\n');
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+
+      const boxX = 120;
+      const boxY = 300;
+      const boxW = 272;
+      const boxH = 272;
+
+      ctx.font = `${fontSize}px sans-serif`;
+      ctx.textAlign = align;
+      ctx.fillStyle = '#000';
+
+      const totalHeight = fontSize * lineHeight * lines.length;
+      let y = boxY + (boxH - totalHeight) / 2 + fontSize;
+
+      let x;
+      if (align === 'left') x = boxX;
+      else if (align === 'right') x = boxX + boxW;
+      else x = boxX + boxW / 2;
+
+      lines.forEach(line => {
+        ctx.fillText(line, x, y);
+        y += fontSize * lineHeight;
+      });
+    }
+
+    textarea.addEventListener('input', drawText);
+    fontSizeInput.addEventListener('input', () => {
+      fontSizeVal.textContent = fontSizeInput.value;
+      drawText();
+    });
+    lineHeightInput.addEventListener('input', () => {
+      lineHeightVal.textContent = lineHeightInput.value;
+      drawText();
+    });
+    textAlignSelect.addEventListener('change', drawText);
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'scratch-card.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  </script>
+</body>
+</html>
