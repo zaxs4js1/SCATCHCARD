@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>刮刮樂內容編輯器 v1.8</title>
+  <title>刮刮樂內容編輯器 v1.9</title>
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -80,7 +79,7 @@
   </style>
 </head>
 <body>
-  <div class="version">v1.8</div>
+  <div class="version">v1.9</div>
   <h2>刮刮樂內容編輯器</h2>
 
   <div class="controls">
@@ -108,7 +107,7 @@
     </div>
   </div>
 
-  <canvas id="previewCanvas" width="550" height="734"></canvas>
+  <canvas id="previewCanvas" width="550" height="685"></canvas>
 
   <div class="button-row">
     <button id="downloadBtn">下載整張 PNG</button>
@@ -154,13 +153,9 @@
       ctx.textAlign = textAlign;
       ctx.fillStyle = "#000";
 
-      const boxX = 126;
-      const boxY = 282;
-      const boxW = 293;
       const totalHeight = fontSize * lineHeight * lines.length;
-      let y = boxY + (boxW - totalHeight) / 2 + fontSize;
-
-      let x = textAlign === "left" ? boxX : textAlign === "right" ? boxX + boxW : boxX + boxW / 2;
+      let y = 295 + (265 - totalHeight) / 2 + fontSize;
+      let x = textAlign === "left" ? 130 : textAlign === "right" ? 130 + 265 : 130 + 265 / 2;
 
       lines.forEach(line => {
         ctx.fillText(line, x, y);
