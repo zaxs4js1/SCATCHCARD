@@ -1,112 +1,36 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>刮刮樂內容編輯器 v1.6</title>
+  <title>刮刮樂內容編輯器 v1.7</title>
   <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: #f9f9f9;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 0;
-      padding: 20px;
-      position: relative;
-    }
-    .version {
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      font-size: 14px;
-      color: #888;
-    }
-    h2 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-    #previewCanvas {
-      border: 6px solid #e3e3e3;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      margin-top: 20px;
-    }
-    .controls {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 234px;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    label {
-      font-weight: bold;
-      color: #444;
-    }
-    textarea {
-      width: 100%;
-      height: 180px;
-      resize: none;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 10px;
-      font-size: 16px;
-    }
-    input[type="range"] {
-      width: 100%;
-    }
-    .align-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: space-between;
-    }
-    .align-buttons button {
-      flex: 1;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background: #f0f0f0;
-      cursor: pointer;
-    }
-    .align-buttons button.active {
-      background: #007bff;
-      color: white;
-      border-color: #007bff;
-    }
-    .button-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    button {
-      padding: 12px 16px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background-color: #28a745;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #218838;
-    }
+    body { font-family: sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; background: #f9f9f9; position: relative; }
+    .version { position: absolute; top: 10px; right: 20px; color: #777; font-size: 14px; }
+    #previewCanvas { border: 1px solid #ccc; margin-top: 10px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+    .controls { margin-top: 10px; width: 250px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; }
+    textarea { width: 100%; height: 180px; resize: none; }
+    input[type="range"] { width: 100%; }
+    .align-buttons { display: flex; justify-content: space-between; gap: 6px; }
+    .align-buttons button.active { background: #007bff; color: #fff; }
+    .align-buttons button { flex: 1; padding: 6px; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
+    button { padding: 8px 12px; background: #28a745; border: none; color: white; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #218838; }
   </style>
 </head>
 <body>
-  <div class="version">v1.6</div>
+  <div class="version">v1.7</div>
   <h2>刮刮樂內容編輯器</h2>
 
   <div class="controls">
     <label>刮刮樂文字：</label>
     <textarea id="scratchText">恭喜中獎！🎉</textarea>
 
-    <label>文字大小（px）：<span id="fontSizeVal">32</span></label>
+    <label>文字大小：<span id="fontSizeVal">32</span> px</label>
     <input type="range" id="fontSize" min="10" max="80" value="32">
 
-    <label>行距（em）：<span id="lineHeightVal">1.2</span></label>
+    <label>行距：<span id="lineHeightVal">1.2</span></label>
     <input type="range" id="lineHeight" min="1" max="3" step="0.1" value="1.2">
 
     <label>文字對齊：</label>
@@ -120,41 +44,45 @@
   <canvas id="previewCanvas" width="550" height="734"></canvas>
 
   <div class="button-row">
+    <button onclick="changeBG(-1)">← 上一張</button>
+    <button onclick="changeBG(1)">下一張 →</button>
     <button id="downloadBtn">下載整張 PNG</button>
     <button id="downloadTextBtn">另存文字為 PNG</button>
   </div>
 
   <script>
-    const canvas = document.getElementById('previewCanvas');
-    const ctx = canvas.getContext('2d');
-    const textarea = document.getElementById('scratchText');
-    const fontSizeInput = document.getElementById('fontSize');
-    const lineHeightInput = document.getElementById('lineHeight');
-    const fontSizeVal = document.getElementById('fontSizeVal');
-    const lineHeightVal = document.getElementById('lineHeightVal');
-    const alignButtons = document.querySelectorAll('.align-buttons button');
+    const canvas = document.getElementById("previewCanvas");
+    const ctx = canvas.getContext("2d");
+    const textarea = document.getElementById("scratchText");
+    const fontSizeInput = document.getElementById("fontSize");
+    const lineHeightInput = document.getElementById("lineHeight");
+    const fontSizeVal = document.getElementById("fontSizeVal");
+    const lineHeightVal = document.getElementById("lineHeightVal");
+    const alignButtons = document.querySelectorAll(".align-buttons button");
 
-    let textAlign = 'center';
-
-    const bgImage = new Image();
-    bgImage.src = 'Snipaste_2025-05-14_00-49-47.png';
-    let bgLoaded = false;
-
-    bgImage.onload = () => {
-      bgLoaded = true;
-      drawText();
-    };
+    let textAlign = "center";
+    let bgIndex = 0;
+    const bgFiles = ["bg1.png", "bg2.png", "bg3.png"];
+    const bgImages = bgFiles.map(src => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
 
     function drawText() {
-      if (!bgLoaded) return;
+      const img = bgImages[bgIndex];
+      if (!img.complete) {
+        img.onload = drawText;
+        return;
+      }
 
       const text = textarea.value;
       const fontSize = parseInt(fontSizeInput.value);
       const lineHeight = parseFloat(lineHeightInput.value);
-      const lines = text.split('\n');
+      const lines = text.split("\n");
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
       const boxX = 126;
       const boxY = 282;
@@ -163,15 +91,14 @@
 
       ctx.font = `${fontSize}px sans-serif`;
       ctx.textAlign = textAlign;
-      ctx.fillStyle = '#000';
+      ctx.fillStyle = "#000";
 
       const totalHeight = fontSize * lineHeight * lines.length;
       let y = boxY + (boxH - totalHeight) / 2 + fontSize;
 
-      let x;
-      if (textAlign === 'left') x = boxX;
-      else if (textAlign === 'right') x = boxX + boxW;
-      else x = boxX + boxW / 2;
+      let x = boxX + boxW / 2;
+      if (textAlign === "left") x = boxX;
+      else if (textAlign === "right") x = boxX + boxW;
 
       lines.forEach(line => {
         ctx.fillText(line, x, y);
@@ -179,53 +106,59 @@
       });
     }
 
-    textarea.addEventListener('input', drawText);
-    fontSizeInput.addEventListener('input', () => {
-      fontSizeVal.textContent = fontSizeInput.value;
+    function changeBG(delta) {
+      bgIndex = (bgIndex + delta + bgImages.length) % bgImages.length;
       drawText();
-    });
-    lineHeightInput.addEventListener('input', () => {
-      lineHeightVal.textContent = lineHeightInput.value;
-      drawText();
-    });
+    }
+
     alignButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        alignButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+      btn.addEventListener("click", () => {
+        alignButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
         textAlign = btn.dataset.align;
         drawText();
       });
     });
 
-    document.getElementById('downloadBtn').addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = 'scratch-card.png';
+    textarea.addEventListener("input", drawText);
+    fontSizeInput.addEventListener("input", () => {
+      fontSizeVal.textContent = fontSizeInput.value;
+      drawText();
+    });
+    lineHeightInput.addEventListener("input", () => {
+      lineHeightVal.textContent = lineHeightInput.value;
+      drawText();
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = "scratch-card.png";
       link.href = canvas.toDataURL();
       link.click();
     });
 
-    document.getElementById('downloadTextBtn').addEventListener('click', () => {
-      const text = textarea.value;
+    document.getElementById("downloadTextBtn").addEventListener("click", () => {
       const fontSize = parseInt(fontSizeInput.value);
       const lineHeight = parseFloat(lineHeightInput.value);
-      const lines = text.split('\n');
-      const tempCanvas = document.createElement('canvas');
+      const lines = textarea.value.split("\n");
+
+      const tempCanvas = document.createElement("canvas");
       const padding = 20;
       const width = 600;
       const height = fontSize * lineHeight * lines.length + padding * 2;
       tempCanvas.width = width;
       tempCanvas.height = height;
-      const tctx = tempCanvas.getContext('2d');
+      const tctx = tempCanvas.getContext("2d");
 
-      tctx.fillStyle = '#fff';
+      tctx.fillStyle = "#fff";
       tctx.fillRect(0, 0, width, height);
-      tctx.fillStyle = '#000';
+      tctx.fillStyle = "#000";
       tctx.font = `${fontSize}px sans-serif`;
       tctx.textAlign = textAlign;
 
       let x = width / 2;
-      if (textAlign === 'left') x = padding;
-      else if (textAlign === 'right') x = width - padding;
+      if (textAlign === "left") x = padding;
+      else if (textAlign === "right") x = width - padding;
 
       let y = padding + fontSize;
       lines.forEach(line => {
@@ -233,11 +166,13 @@
         y += fontSize * lineHeight;
       });
 
-      const link = document.createElement('a');
-      link.download = 'scratch-text.png';
+      const link = document.createElement("a");
+      link.download = "scratch-text.png";
       link.href = tempCanvas.toDataURL();
       link.click();
     });
+
+    window.onload = drawText;
   </script>
 </body>
 </html>
