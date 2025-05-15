@@ -1,85 +1,25 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>刮刮樂內容編輯器 v1.9</title>
+  <title>刮刮樂內容編輯器 v2.0</title>
   <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: #f9f9f9;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 0;
-      padding: 20px;
-      position: relative;
-    }
-    .version {
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      font-size: 14px;
-      color: #888;
-    }
-    h2 {
-      margin-bottom: 20px;
-    }
-    #previewCanvas {
-      border: 6px solid #e3e3e3;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      margin-top: 20px;
-    }
-    .controls {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 234px;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    select {
-      padding: 6px;
-    }
-    textarea {
-      width: 100%;
-      height: 180px;
-      resize: none;
-    }
-    .align-buttons {
-      display: flex;
-      justify-content: space-between;
-    }
-    .align-buttons button {
-      flex: 1;
-      margin: 2px;
-    }
-    .align-buttons button.active {
-      background: #007bff;
-      color: white;
-    }
-    .button-row {
-      margin-top: 20px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    button {
-      padding: 10px 14px;
-      font-size: 14px;
-      border: none;
-      border-radius: 8px;
-      background-color: #28a745;
-      color: white;
-      cursor: pointer;
-    }
+    body { font-family: "Segoe UI", sans-serif; background: #f9f9f9; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; position: relative; }
+    .version { position: absolute; top: 10px; right: 20px; font-size: 14px; color: #888; }
+    #previewCanvas { border: 6px solid #e3e3e3; border-radius: 12px; margin-top: 20px; }
+    .controls { margin-top: 10px; display: flex; flex-direction: column; gap: 12px; width: 234px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    select { padding: 6px; }
+    textarea { width: 100%; height: 180px; resize: none; }
+    .align-buttons { display: flex; justify-content: space-between; }
+    .align-buttons button { flex: 1; margin: 2px; }
+    .align-buttons button.active { background: #007bff; color: white; }
+    .button-row { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+    button { padding: 10px 14px; font-size: 14px; border: none; border-radius: 8px; background-color: #28a745; color: white; cursor: pointer; }
   </style>
 </head>
 <body>
-  <div class="version">v1.9</div>
+  <div class="version">v2.0</div>
   <h2>刮刮樂內容編輯器</h2>
 
   <div class="controls">
@@ -111,7 +51,7 @@
 
   <div class="button-row">
     <button id="downloadBtn">下載整張 PNG</button>
-    <button id="downloadTextBtn">另存文字為 PNG</button>
+    <button id="downloadTextBtn">另存文字為 PNG（1200x1200）</button>
   </div>
 
   <script>
@@ -144,18 +84,18 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      const text = textarea.value;
       const fontSize = parseInt(fontSizeInput.value);
       const lineHeight = parseFloat(lineHeightInput.value);
-      const lines = text.split("\n");
+      const lines = textarea.value.split("\n");
 
-      ctx.font = `${fontSize}px sans-serif`;
+      ctx.font = fontSize + "px sans-serif";
       ctx.textAlign = textAlign;
       ctx.fillStyle = "#000";
 
-      const totalHeight = fontSize * lineHeight * lines.length;
-      let y = 295 + (265 - totalHeight) / 2 + fontSize;
-      let x = textAlign === "left" ? 130 : textAlign === "right" ? 130 + 265 : 130 + 265 / 2;
+      const boxX = 130, boxY = 295, boxW = 265, boxH = 265;
+      const totalHeight = lines.length * fontSize * lineHeight;
+      let y = boxY + (boxH - totalHeight) / 2 + fontSize;
+      let x = textAlign === "left" ? boxX : textAlign === "right" ? boxX + boxW : boxX + boxW / 2;
 
       lines.forEach(line => {
         ctx.fillText(line, x, y);
@@ -197,23 +137,22 @@
       const fontSize = parseInt(fontSizeInput.value);
       const lineHeight = parseFloat(lineHeightInput.value);
       const lines = textarea.value.split("\n");
-      const padding = 20;
-      const width = 600;
-      const height = fontSize * lineHeight * lines.length + padding * 2;
 
       const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = width;
-      tempCanvas.height = height;
+      tempCanvas.width = 1200;
+      tempCanvas.height = 1200;
       const tctx = tempCanvas.getContext("2d");
 
       tctx.fillStyle = "#fff";
-      tctx.fillRect(0, 0, width, height);
+      tctx.fillRect(0, 0, 1200, 1200);
       tctx.fillStyle = "#000";
-      tctx.font = `${fontSize}px sans-serif`;
+      tctx.font = fontSize + "px sans-serif";
       tctx.textAlign = textAlign;
 
-      let x = textAlign === "left" ? padding : textAlign === "right" ? width - padding : width / 2;
-      let y = padding + fontSize;
+      const totalHeight = lines.length * fontSize * lineHeight;
+      let y = (1200 - totalHeight) / 2 + fontSize;
+      let x = textAlign === "left" ? 100 : textAlign === "right" ? 1100 : 600;
+
       lines.forEach(line => {
         tctx.fillText(line, x, y);
         y += fontSize * lineHeight;
